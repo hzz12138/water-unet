@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # 将网络拷贝到deivce中
     net.to(device=device)
     # 加载模型参数
-    net.load_state_dict(torch.load('best_model.pth', map_location=device))
+    net.load_state_dict(torch.load('best_model_0721.pth', map_location=device))
     # 测试模式
     net.eval()
     # 读取所有图片路径
@@ -27,12 +27,6 @@ if __name__ == "__main__":
         info = image.read_img_info()
         data = image.read_img_data()
 
-
-        # img = read_Tiff(test_path)
-        # 转为灰度图
-        # img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        # 转为batch为1，通道为1，大小为512*512的数组
-        # img = img.reshape(1, 1, img.shape[0], img.shape[1])
         # 转为tensor
         img = np.expand_dims(data, 0)
         img_tensor = torch.from_numpy(img)
@@ -46,5 +40,4 @@ if __name__ == "__main__":
         pred[pred >= 0.5] = 255
         pred[pred < 0.5] = 0
         # 保存图片
-        #cv2.imwrite(save_res_path, pred)
         image.write_img(save_res_path, pred, img_geotrans=info[3], img_proj=info[4])
