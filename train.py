@@ -128,7 +128,6 @@ if __name__ == "__main__":
     writer = SummaryWriter('./runs')
 
     # net.load_state_dict(torch.load('model/best_model.pth'))
-    # net.eval()
     train_net(net=net, device=device, train_data_path=train_data_path, val_data_path=val_data_path,
               batch_size=batch_size, epochs=epochs, lr=lr)
     writer.close()
