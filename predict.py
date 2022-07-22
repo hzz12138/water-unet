@@ -12,11 +12,11 @@ if __name__ == "__main__":
     # 将网络拷贝到deivce中
     net.to(device=device)
     # 加载模型参数
-    net.load_state_dict(torch.load('best_model_0721.pth', map_location=device))
+    net.load_state_dict(torch.load('model/best_model.pth', map_location=device))
     # 测试模式
     net.eval()
     # 读取所有图片路径
-    tests_path = glob.glob('validation/image/*.tif')
+    tests_path = glob.glob('111/image/*.tif')
     # 遍历所有图片
     for test_path in tests_path:
         # 保存结果地址
