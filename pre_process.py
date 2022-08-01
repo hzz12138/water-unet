@@ -115,20 +115,20 @@ class ImageProcess:
         return self.data_8bit
 
 
-# if __name__ == '__main__':
-#     # filepath = r'E:\Zph\CB04A_test\2Process\5_mosaic\CB04A_mosaic_v1.tif'
-#     # #filepath = r'E:\Zph\Pytorch\data\image\bands_234_clip.tif'
-#     # image = ImageProcess(filepath)
-#     # # 获取影像信息
-#     # info = image.read_img_info()
-#     # print(type(info[4]), info[4])
-#     # # 获取影像数据(np.array类型)
-#     # data = image.read_img_data()
-#     # # 将影像矩阵转为8bit
-#     # data_8bit = image.trans_img_16bit_to_8bit()
-#     # image.write_img('out/CB04A_mosaic_8bit.tif', data_8bit, img_geotrans=info[3], img_proj=info[4])
-#
-#     image_path = r'E:\Zph\Pytorch\Code\out\CB04A_mosaic_8bit.tif'
-#     lable_path = r'E:\Zph\Pytorch\Code\out\water_label1.tif'
-#
-#     print('finish')
+if __name__ == '__main__':
+    filepath = r'E:\Zph\0727琼中\mosaic.tif'
+    #filepath = r'E:\Zph\Pytorch\data\image\bands_234_clip.tif'
+    image = ImageProcess(filepath)
+    # 获取影像信息
+    info = image.read_img_info()
+    print(type(info[4]), info[4])
+    # 获取影像数据(np.array类型)
+    data = image.read_img_data()
+    # 将影像矩阵转为8bit
+    data_8bit = image.trans_img_16bit_to_8bit()
+    image.write_img(r'E:\Zph\0727琼中\mosaic_8bit.tif', data_8bit, img_geotrans=info[3], img_proj=info[4])
+
+    # image_path = r'E:\Zph\Pytorch\Code\out\CB04A_mosaic_8bit.tif'
+    # lable_path = r'E:\Zph\Pytorch\Code\out\water_label1.tif'
+
+    print('finish')

@@ -9,6 +9,25 @@ import cv2
 from torchvision import transforms as T
 from UNet import Unet
 gdal.PushErrorHandler("CPLQuietErrorHandler")
+from UNetPP import NestedUNet
+import argparse
+from attention_unet import AttU_Net
+
+def getArgs():
+    parse = argparse.ArgumentParser()
+    parse.add_argument('--deepsupervision', default=0)
+    parse.add_argument("--action", type=str, help="train/test/train&test", default="train&test")
+    parse.add_argument("--epoch", type=int, default=21)
+    parse.add_argument('--arch', '-a', metavar='ARCH', default='resnet34_unet',
+                       help='UNet/resnet34_unet/unet++/myChannelUnet/Attention_UNet/segnet/r2unet/fcn32s/fcn8s')
+    parse.add_argument("--batch_size", type=int, default=1)
+    parse.add_argument('--dataset', default='driveEye',  # dsb2018_256
+                       help='dataset name:liver/esophagus/dsb2018Cell/corneal/driveEye/isbiCell/kaggleLung')
+    # parse.add_argument("--ckp", type=str, help="the path of model weight file")
+    parse.add_argument("--log_dir", default='result/log', help="log dir")
+    parse.add_argument("--threshold",type=float,default=None)
+    args = parse.parse_args()
+    return args
 
 # 读取tif数据集
 def readTif(fileName, xoff = 0, yoff = 0, data_width = 0, data_height = 0):
@@ -159,8 +178,8 @@ def Result(shape, TifArray, npyfile, RepetitiveLength, RowOver, ColumnOver):
 
 
 
-TifPath = r"E:\Zph\Pytorch\Code\out\CB04A_mosaic_8bit.tif"
-ResultPath = r"predict_CB04A_mosaic_8bit.tif"
+TifPath = r"C:\Users\Lenovo\Desktop\water_test\S04_8bit.tif"
+ResultPath = r"C:\Users\Lenovo\Desktop\water_test\predict_attu_net.tif"
 
 im_width, im_height, im_bands, big_image, im_geotrans, im_proj = readTif(TifPath)
 big_image = big_image.swapaxes(1, 0).swapaxes(1, 2)
@@ -169,11 +188,21 @@ area_perc = 0.5
 RepetitiveLength = int((1 - math.sqrt(area_perc)) * 512 / 2)
 TifArray, RowOver, ColumnOver = TifCroppingArray(big_image, RepetitiveLength)
 
-model = Unet(4,1)
+# unet model
+# model = Unet(4,1)
+
+# unetpp model
+# args = getArgs()
+# args.deepsupervision = False
+# model = NestedUNet(args,4,1).cuda()
+
+# attu_unet model
+model = AttU_Net(4,1).cuda()
+
 # 将模型加载到指定设备DEVICE上
 DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 model.to(DEVICE)
-model.load_state_dict(torch.load('model/best_model.pth', map_location=DEVICE))
+model.load_state_dict(torch.load('model/best_model_attu_net.pth', map_location=DEVICE))
 model.eval()
 
 predicts = []
