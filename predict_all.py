@@ -184,7 +184,7 @@ ResultPath = r"C:\Users\Lenovo\Desktop\water_test\predict_attu_net.tif"
 im_width, im_height, im_bands, big_image, im_geotrans, im_proj = readTif(TifPath)
 big_image = big_image.swapaxes(1, 0).swapaxes(1, 2)
 
-area_perc = 0.5
+area_perc = 0.1
 RepetitiveLength = int((1 - math.sqrt(area_perc)) * 512 / 2)
 TifArray, RowOver, ColumnOver = TifCroppingArray(big_image, RepetitiveLength)
 
