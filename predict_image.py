@@ -176,50 +176,51 @@ def Result(shape, TifArray, npyfile, RepetitiveLength, RowOver, ColumnOver):
                 ] = img[RepetitiveLength: 512 - RepetitiveLength, RepetitiveLength: 512 - RepetitiveLength]
     return result
 
+if __name__ == '__main__':
+    TifPath = r"E:\Zph\samples\test0809\20210810_0183_8bit.tif"
+    ResultPath = r"E:\Zph\samples\test0809\20210810_0183_unet.tif"
 
+    im_width, im_height, im_bands, big_image, im_geotrans, im_proj = readTif(TifPath)
+    big_image = big_image.swapaxes(1, 0).swapaxes(1, 2)
 
-TifPath = r"C:\Users\Lenovo\Desktop\water_test\S04_8bit.tif"
-ResultPath = r"C:\Users\Lenovo\Desktop\water_test\predict_attu_net.tif"
+    area_perc = 0.9
+    RepetitiveLength = int((1 - math.sqrt(area_perc)) * 512 / 2)
+    TifArray, RowOver, ColumnOver = TifCroppingArray(big_image, RepetitiveLength)
 
-im_width, im_height, im_bands, big_image, im_geotrans, im_proj = readTif(TifPath)
-big_image = big_image.swapaxes(1, 0).swapaxes(1, 2)
+    # unet model
+    model = Unet(4,1).cuda()
 
-area_perc = 0.1
-RepetitiveLength = int((1 - math.sqrt(area_perc)) * 512 / 2)
-TifArray, RowOver, ColumnOver = TifCroppingArray(big_image, RepetitiveLength)
+    # unetpp model
+    # args = getArgs()
+    # args.deepsupervision = False
+    # model = NestedUNet(args,4,1).cuda()
 
-# unet model
-# model = Unet(4,1)
+    # attu_unet model
+    # model = AttU_Net(4,1).cuda()
 
-# unetpp model
-# args = getArgs()
-# args.deepsupervision = False
-# model = NestedUNet(args,4,1).cuda()
+    # 将模型加载到指定设备DEVICE上
+    DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    model.to(DEVICE)
+    model.load_state_dict(torch.load('model/best_model_unet0805.pth', map_location=DEVICE))
+    # model.load_state_dict(torch.load('model/best_model_unetpp0808.pth', map_location=DEVICE))
+    # model.load_state_dict(torch.load('model/best_model_attu_net0808.pth', map_location=DEVICE))
+    model.eval()
 
-# attu_unet model
-model = AttU_Net(4,1).cuda()
+    predicts = []
+    for i in range(len(TifArray)):
+        for j in range(len(TifArray[0])):
+            image = TifArray[i][j].swapaxes(0,2).swapaxes(1,2)
+            img = np.expand_dims(image, 0)
+            img_tensor = torch.from_numpy(img)
+            img_tensor = img_tensor.to(device=DEVICE, dtype=torch.float32)
+            pred = model(img_tensor)
+            pred = np.array(pred.data.cpu()[0])[0]
+            pred[pred >= 0.5] = 255
+            pred[pred < 0.5] = 0
+            predicts.append(pred)
+        print(f"""{i}/{len(TifArray)}""")
 
-# 将模型加载到指定设备DEVICE上
-DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-model.to(DEVICE)
-model.load_state_dict(torch.load('model/best_model_attu_net.pth', map_location=DEVICE))
-model.eval()
-
-predicts = []
-for i in range(len(TifArray)):
-    for j in range(len(TifArray[0])):
-        image = TifArray[i][j].swapaxes(0,2).swapaxes(1,2)
-        img = np.expand_dims(image, 0)
-        img_tensor = torch.from_numpy(img)
-        img_tensor = img_tensor.to(device=DEVICE, dtype=torch.float32)
-        pred = model(img_tensor)
-        pred = np.array(pred.data.cpu()[0])[0]
-        pred[pred >= 0.5] = 255
-        pred[pred < 0.5] = 0
-        predicts.append(pred)
-    print(f"""{i}/{len(TifArray)}""")
-
-# 保存结果predictspredicts
-result_shape = (big_image.shape[0], big_image.shape[1])
-result_data = Result(result_shape, TifArray, predicts, RepetitiveLength, RowOver, ColumnOver)
-writeTiff(ResultPath, result_data,im_geotrans,im_proj)
+    # 保存结果predictspredicts
+    result_shape = (big_image.shape[0], big_image.shape[1])
+    result_data = Result(result_shape, TifArray, predicts, RepetitiveLength, RowOver, ColumnOver)
+    writeTiff(ResultPath, result_data,im_geotrans,im_proj)

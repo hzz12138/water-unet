@@ -116,7 +116,7 @@ class ImageProcess:
 
 
 if __name__ == '__main__':
-    filepath = r'E:\Zph\samples\images\suzhou.tif'
+    filepath = r'E:\Zph\0803阳澄湖\空间数据\image\20210502_image_new_Georef.tif'
     #filepath = r'E:\Zph\Pytorch\data\image\bands_234_clip.tif'
     image = ImageProcess(filepath)
     # 获取影像信息
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     data = image.read_img_data()
     # 将影像矩阵转为8bit
     data_8bit = image.trans_img_16bit_to_8bit()
-    image.write_img(r'E:\Zph\samples\16to8\suzhou_8bit.tif', data_8bit, img_geotrans=info[3], img_proj=info[4])
+    image.write_img(r'E:\Zph\0803阳澄湖\空间数据\8bit\20210502_image_new_Georef_8bit.tif', data_8bit, img_geotrans=info[3], img_proj=info[4])
 
     # image_path = r'E:\Zph\Pytorch\Code\out\CB04A_mosaic_8bit.tif'
     # lable_path = r'E:\Zph\Pytorch\Code\out\water_label1.tif'
